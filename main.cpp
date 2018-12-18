@@ -133,14 +133,14 @@ void simulate_temperature_sensor() {
     static float temp = 22.2;
     float delta = (float)rand()/(float)RAND_MAX - 0.5;
     temp += delta/10.0;
-    temp_res->set_value(temp);
+    temp_res->set_value_float(temp);
 
 }
 void simulate_pressure_sensor() {
     static float pressure = 101.325;
     float delta = (float)rand()/(float)RAND_MAX - 0.5;
     pressure += delta/10.0;
-    pressure_res->set_value(pressure);
+    pressure_res->set_value_float(pressure);
 
 }
 
