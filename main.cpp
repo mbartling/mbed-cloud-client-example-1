@@ -42,6 +42,9 @@ static M2MResource* button_res;
 static M2MResource* pattern_res;
 static M2MResource* blink_res;
 
+static M2MResource* temp_res;
+static M2MResource* pressure_res;
+
 // Pointer to mbedClient, used for calling close function.
 static SimpleM2MClient *client;
 
@@ -126,6 +129,21 @@ void factory_reset(void *)
     }
 }
 
+void simulate_temperature_sensor() {
+    static float temp = 22.2;
+    float delta = (float)rand()/(float)RAND_MAX - 0.5;
+    temp += delta/10.0;
+    temp_res->set_value(temp);
+
+}
+void simulate_pressure_sensor() {
+    static float pressure = 101.325;
+    float delta = (float)rand()/(float)RAND_MAX - 0.5;
+    pressure += delta/10.0;
+    pressure_res->set_value(pressure);
+
+}
+
 void main_application(void)
 {
 #if defined(__linux__) && (MBED_CONF_MBED_TRACE_ENABLE == 0)
@@ -199,6 +217,11 @@ void main_application(void)
                              M2MBase::POST_ALLOWED, "", false, (void*)blink_callback, (void*)button_status_callback);
     // Use delayed response
     blink_res->set_delayed_response(true);
+    
+    temp_res = mbedClient.add_cloud_resource(3303, 0, 3303, "temperature", M2MResourceInstance::FLOAT,
+                              M2MBase::GET_ALLOWED, "22.2", true, NULL, NULL);
+    pressure_res = mbedClient.add_cloud_resource(3315, 0, 3315, "pressure kPa", M2MResourceInstance::FLOAT,
+                              M2MBase::GET_ALLOWED, "101.325", true, NULL, NULL);
 
     // Create resource for unregistering the device. Path of this resource will be: 5000/0/1.
     mbedClient.add_cloud_resource(5000, 0, 1, "unregister", M2MResourceInstance::STRING,
@@ -214,6 +237,10 @@ void main_application(void)
     // Add certificate renewal callback
     mbedClient.get_cloud_client().on_certificate_renewal(certificate_renewal_cb);
 #endif // MBED_CONF_MBED_CLOUD_CLIENT_DISABLE_CERTIFICATE_ENROLLMENT
+
+    //Guarantee unique across devices
+    srand(mbedClient.get_unique_id());
+
 
 
     // Check if client is registering or registered, if true sleep and repeat.
