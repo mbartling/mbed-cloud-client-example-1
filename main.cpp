@@ -219,9 +219,9 @@ void main_application(void)
     blink_res->set_delayed_response(true);
     
     temp_res = mbedClient.add_cloud_resource(3303, 0, 3303, "temperature", M2MResourceInstance::FLOAT,
-                              M2MBase::GET_ALLOWED, "22.2", true, NULL, NULL);
+                              M2MBase::GET_ALLOWED, 0, true, NULL, NULL);
     pressure_res = mbedClient.add_cloud_resource(3315, 0, 3315, "pressure kPa", M2MResourceInstance::FLOAT,
-                              M2MBase::GET_ALLOWED, "101.325", true, NULL, NULL);
+                              M2MBase::GET_ALLOWED, 0, true, NULL, NULL);
 
     // Create resource for unregistering the device. Path of this resource will be: 5000/0/1.
     mbedClient.add_cloud_resource(5000, 0, 1, "unregister", M2MResourceInstance::STRING,
@@ -243,11 +243,14 @@ void main_application(void)
 
 
 
+    printf("Starting runtime\n");
     // Check if client is registering or registered, if true sleep and repeat.
 
     while (mbedClient.is_register_called()) {
         static int button_count = 0;
         mcc_platform_do_wait(100);
+        simulate_temperature_sensor();
+        simulate_pressure_sensor();
         if (mcc_platform_button_clicked()) {
             button_res->set_value(++button_count);
         }
